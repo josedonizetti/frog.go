@@ -69,6 +69,7 @@ func (l *lexer) run() {
 }
 
 func (l *lexer) emit(t itemType) {
+  fmt.Println(l.start, l.pos)
   l.items <- item{t, l.input[l.start:l.pos]}
   l.start = l.pos
 }
@@ -83,7 +84,9 @@ func lexText(l *lexer) stateFn {
     r := l.next()
 
     if isSpace(r) {
+      l.backup()
       l.emit(itemText)
+      l.ignoreSpace()
     }
 
     if r == eof { break }
@@ -107,6 +110,15 @@ func (l *lexer) next() (rune) {
   l.width = w
   l.pos += l.width
   return r
+}
+
+func (l *lexer) backup() {
+  l.pos -= 1
+}
+
+func (l *lexer) ignoreSpace() {
+  l.pos += 1
+  l.start += 1
 }
 
 func isSpace(r rune) bool {
